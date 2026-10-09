@@ -112,16 +112,32 @@ zip 用 `ditto` 而不是 `zip` 命令：ditto 会保住 .app 的代码签名与
 删文件是不够的 —— 翻历史照样能看到。快照从零开始，开发历史一个字节都不动。代价是公开仓库没有
 逐次提交的开发过程 —— 这个工具小，值得。
 
-首次发布与发版：
+首次建仓库：
 
 ```bash
 gh repo create Keep-Awake --public --source=. --push          # 在快照目录里
-gh release create v0.1.0 "dist/KeepAwake-0.1.0.zip" "dist/KeepAwake-0.1.0.dmg" \
-  --title "0.1.0" --notes "首个公开版本"
 ```
 
-后续发布把新快照导出到公开仓库的 clone 里提交即可（公开历史 = 一次发布一条提交，**不要 `--force`**
-重推）。`scripts/check-repo.sh` 第 5 项允许「没有 remote」或「remote 只指向本项目自己的仓库」——
+**每次发版都走同一条路：改版本号 → 导出快照 → 推送 → 打 tag + release。** tag 由
+`gh release create` 自动建（指向当时那份快照的提交），所以「发过哪些版本」在仓库页上一眼可见：
+
+```bash
+# 1. 改 packaging/Info.plist 的 CFBundleShortVersionString（对外版本号只在这里定）
+# 2. 重新导出快照
+sh scripts/make-public.sh /tmp/KeepAwake-public-<版本>
+# 3. 同步到公开仓库的 clone —— 不要 --force，公开历史 = 一次发布一条提交
+git clone https://github.com/MiseHinoha/Keep-Awake /tmp/keepawake-public
+/usr/bin/rsync -a --delete --exclude '.git' /tmp/KeepAwake-public-<版本>/ /tmp/keepawake-public/
+cd /tmp/keepawake-public && git add -A && git commit -m "release: <版本>" && git push
+# 4. 打 tag + release，挂上构建好的产物
+gh release create v<版本> <路径>/dist/KeepAwake-<版本>.zip <路径>/dist/KeepAwake-<版本>.dmg \
+  --title "<版本>" --notes-file <发版说明>
+# 5. 核对：读回的摘要要和本地一致
+gh release view v<版本> --json assets    # digest 逐个比对 shasum -a 256
+```
+
+只是文档 / 脚本改动（不涉及新版本）时，走第 2–3 步推上去即可，不必发版。
+`scripts/check-repo.sh` 第 5 项允许「没有 remote」或「remote 只指向本项目自己的仓库」——
 所以同一份自检在开发仓库和公开 clone 里都过，发布前不需要改脚本。
 
 
