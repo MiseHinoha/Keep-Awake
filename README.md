@@ -40,6 +40,9 @@ MacBook 一贯的坑：合盖（clamshell）触发的是比「空闲睡眠」更
 
 ## 安装
 
+不想自己编译的话，[Releases](https://github.com/MiseHinoha/Keep-Awake/releases) 里有打包好的
+`KeepAwake-<版本>.dmg` 与 `.zip`（内容一样，任选）；要自己构建就照下面的命令来。
+
 ```bash
 sh scripts/build.sh                     # 编译 + 组装 build/KeepAwake.app
 sh scripts/run-tests.sh                 # 29 项测试（Core 纯函数 + 只读集成 + 助手拒绝契约）
