@@ -1,0 +1,6 @@
+build/
+dist/
+.DS_Store
+
+# 抠图工具会顺带输出一张放在洋红底上的预览图，用来人眼检查残留 —— 属于调试产物，不入库
+packaging/*-preview.png

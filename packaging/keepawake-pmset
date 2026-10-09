@@ -1,0 +1,29 @@
+#!/bin/sh
+# KeepAwake 的特权助手：只做一件事 —— 打开或关闭「合盖也不睡」。
+#
+# 它由 root 拥有、装到 /usr/local/sbin/，并通过 /etc/sudoers.d/keepawake
+# 授权免密执行。参数必须恰好是 on 或 off 之一，多一个少一个都拒绝，
+# 所以即使别的进程拿到这条免密通道，能做的也只有改这一个电源开关。
+#
+# 顺序上先校验参数、再检查 root：参数校验不需要特权，放前面才能在不提权的情况下
+# 把「拒绝契约」测出来（见 scripts/run-tests.sh）。
+set -eu
+
+if [ "$#" -ne 1 ]; then
+  echo "usage: keepawake-pmset on|off" >&2
+  exit 64
+fi
+
+VERB="$1"
+case "$VERB" in
+  on|off) ;;
+  *) echo "usage: keepawake-pmset on|off" >&2; exit 64 ;;
+esac
+
+[ "$(id -u)" -eq 0 ] || { echo "keepawake-pmset: 必须以 root 运行" >&2; exit 77; }
+
+if [ "$VERB" = "on" ]; then
+  exec /usr/bin/pmset -a disablesleep 1
+else
+  exec /usr/bin/pmset -a disablesleep 0
+fi

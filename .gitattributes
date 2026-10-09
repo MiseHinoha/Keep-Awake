@@ -1,0 +1,8 @@
+# 打「公开快照」时要跳过的路径（scripts/make-public.sh 用的是 git archive，它认这个文件）。
+#
+# 为什么单列这个文件而不是直接 .gitignore：
+# .gitignore 管的是「不进版本库」，而工作笔记是要进开发仓库的 —— 它只是不该对外公开。
+# 这两件事得分开表达，公开快照才会既保住开发历史、又不把笔记带出去。
+.workbuddy/ export-ignore
+dist/ export-ignore
+build/ export-ignore
